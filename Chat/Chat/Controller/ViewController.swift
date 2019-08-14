@@ -14,7 +14,7 @@ class ViewController: UITableViewController {
         super.viewDidLoad()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(handleLogout))
-        
+        setNeedsStatusBarAppearanceUpdate()
     }
     
     @objc private func handleLogout() {
