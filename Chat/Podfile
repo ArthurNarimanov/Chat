@@ -6,6 +6,8 @@ target 'Chat' do
   use_frameworks!
 pod 'Firebase/Auth'
 pod 'Firebase/Firestore'
+pod 'Firebase/Analytics'
+pod 'Firebase/Database'
   # Pods for Chat
 
 end
