@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import FirebaseCore
 import FirebaseStorage
 
 extension LoginController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -30,19 +31,26 @@ extension LoginController: UIImagePickerControllerDelegate, UINavigationControll
             guard let uid = Auth.auth().currentUser?.uid else { return }
             
             //successfully authenticated user
-            let storageRef = Storage.storage().reference().child("myImage.png")
+            let imageName = NSUUID().uuidString
+            let storageRef = Storage.storage().reference().child("profile_images").child("\(imageName).png")
             
-            if let uploadData = self.profileImageView.image?.pngData() {
+            if let uploadData = self.profileImageView.image?.pngData(){
                 
                 storageRef.putData(uploadData, metadata: nil, completion: { (metadata,  error) in
                     if error != nil {
                         print(error as Any)
                         return
                     }
-                    if let profileImageUrl = metadata?.path {
-                        let values = ["name": name, "email": email, "profileImageUrl": profileImageUrl]
-                        self.registerUserIntoDatabaseWithUID(uid: uid, values: values as [String : AnyObject])
-                    }
+                    storageRef.downloadURL(completion: { (url, err) in
+                        if err != nil {
+                            print(err as Any)
+                            return
+                        }
+                        if let profileImageUrl = url?.absoluteString {
+                            let values = ["name": name, "email": email, "profileImageUrl": profileImageUrl]
+                            self.registerUserIntoDatabaseWithUID(uid: uid, values: values as [String : AnyObject])
+                        }
+                    })
                 })
             }
         }
@@ -95,3 +103,27 @@ extension LoginController: UIImagePickerControllerDelegate, UINavigationControll
     }
     
 }
+/*
+ 
+ let storage = Storage.storage()
+ let storageRef = storage.reference()
+ let photoIdString = "\(NSUUID().uuidString).jpg"
+ let imageReference = storageRef.child("posts").child(photoIdString)
+ if let imageData = UIImageJPEGRepresentation(selectedImage, 0.7) {
+ imageReference.putData(imageData).observe(.success) { (snapshot) in
+ imageReference.downloadURL(completion: { (url, error) in
+ 
+ if let downloadUrl = url {
+ 
+ let directoryURL : NSURL = downloadUrl as NSURL
+ let urlString:String = directoryURL.absoluteString!
+ self.sendDataToDatabase(photoUrl: urlString)
+ }
+ else {
+ print("couldn't get profile image url")
+ return
+ }
+ })
+
+You'll need to add 'Firebase/Core' to your pods and run 'pod update'.
+ */
